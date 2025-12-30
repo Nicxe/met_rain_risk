@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MET Regnrisk",
+        "description": "Visar sannolikhet för nederbörd kommande 12 timmar med MET Norge (met.no) Locationforecast.",
+        "data": {
+          "location": "Plats",
+          "scan_interval": "Uppdateringsintervall (minuter)",
+          "contact": "Kontakt (krävs av met.no för User-Agent)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Den här platsen är redan konfigurerad."
+    },
+    "error": {
+      "invalid_location": "Ogiltig plats. Välj en giltig latitud/longitud.",
+      "invalid_contact": "Ogiltig kontakt. Ange en e-postadress eller URL så met.no kan nå dig vid behov."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MET Regnrisk - inställningar",
+        "description": "Ändra plats, pollningsintervall och kontaktsträngen som används i User-Agent headern.",
+        "data": {
+          "location": "Plats",
+          "scan_interval": "Uppdateringsintervall (minuter)",
+          "contact": "Kontakt (krävs av met.no för User-Agent)"
+        }
+      }
+    }
+  }
+}
+
+

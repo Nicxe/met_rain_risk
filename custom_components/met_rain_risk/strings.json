@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MET Rain Risk",
+        "description": "Shows the probability of precipitation for the next 12 hours using MET Norway (met.no) Locationforecast.",
+        "data": {
+          "location": "Location",
+          "scan_interval": "Update interval (minutes)",
+          "contact": "Contact (required by met.no for User-Agent)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This location is already configured."
+    },
+    "error": {
+      "invalid_location": "Invalid location. Please pick a valid latitude/longitude.",
+      "invalid_contact": "Invalid contact. Provide an email address or URL so met.no can reach you if needed."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MET Rain Risk options",
+        "description": "Update location, polling interval and the contact string used in the User-Agent header.",
+        "data": {
+          "location": "Location",
+          "scan_interval": "Update interval (minutes)",
+          "contact": "Contact (required by met.no for User-Agent)"
+        }
+      }
+    }
+  }
+}
+
+
