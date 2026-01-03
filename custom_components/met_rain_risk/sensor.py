@@ -50,12 +50,12 @@ class MetRainRiskSensor(CoordinatorEntity[MetRainRiskCoordinator], SensorEntity)
         )
 
     @property
-    def native_value(self) -> float | None:
+    def native_value(self) -> int | None:
         data: MetRainRiskData | None = self.coordinator.data
         if not data or data.max_probability_12h is None:
             return None
-        # Keep as float; HA will render nicely
-        return round(float(data.max_probability_12h), 1)
+        # Keep as integer percent (no decimals)
+        return int(round(float(data.max_probability_12h)))
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -73,7 +73,8 @@ class MetRainRiskSensor(CoordinatorEntity[MetRainRiskCoordinator], SensorEntity)
         for hour in data.hourly[:12]:
             t = hour.time.isoformat()
             hourly[t] = {
-                "probability": hour.probability_of_precipitation,
+                # Keep as integer percent (no decimals)
+                "probability": int(round(float(hour.probability_of_precipitation))),
                 "precipitation_amount": hour.precipitation_amount,
                 "symbol_code": hour.symbol_code,
             }
