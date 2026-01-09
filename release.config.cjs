@@ -50,6 +50,16 @@ module.exports = {
         },
         writerOpts: {
           mainTemplate,
+          // `@semantic-release/release-notes-generator` (via conventional-changelog) does NOT
+          // automatically expose semantic-release's branch config like `{ prerelease: true }`
+          // to the Handlebars template context. We inject our own boolean so `{{#if prerelease}}`
+          // in `.release/release-notes.hbs` behaves predictably.
+          finalizeContext: (context) => {
+            const v = String(context?.version || "");
+            // prerelease versions include a "-" suffix, e.g. "1.2.3-beta.1"
+            context.prerelease = v.includes("-");
+            return context;
+          },
           groupBy: "type",
           commitGroupsSort: "title",
           commitsSort: ["scope", "subject"],
@@ -116,7 +126,7 @@ module.exports = {
       "@semantic-release/exec",
       {
         prepareCmd:
-          "jq '.version = \"${nextRelease.version}\"' custom_components/met_rain_risk/manifest.json > manifest.tmp && mv manifest.tmp custom_components/met_rain_risk/manifest.json && cd custom_components && zip -r met_rain_risk.zip met_rain_risk",
+          "node .release/update-manifest-version.js --file custom_components/met_rain_risk/manifest.json --version \"${nextRelease.version}\" && (cd custom_components/met_rain_risk && rm -f ../met_rain_risk.zip && zip -r ../met_rain_risk.zip . -x \"__pycache__/*\" \"*.pyc\" \".DS_Store\" \".pycacheprefix/*\" \".pytest_cache/*\" \".mypy_cache/*\")",
 
         // After a successful release, comment on issues referenced via "Fixes #123" etc
         // in commits included in this release. GitHub will still close issues automatically
