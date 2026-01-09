@@ -78,6 +78,16 @@ module.exports = {
             rawType = rawType === "*" ? "*" : rawType.toLowerCase();
             transformed.type = TYPE_TO_SECTION[rawType] || TYPE_TO_SECTION["*"];
 
+            // Optional: include commit body/description (everything after the first blank line)
+            // and pre-indent it so it renders nicely under the bullet in Markdown.
+            const body = (transformed.body || commit.body || "").trim();
+            if (body) {
+              transformed.bodyIndented = body
+                .split(/\r?\n/)
+                .map((line) => `  ${line}`) // 2-space indent => continues the list item
+                .join("\n");
+            }
+
             // Sanitize/normalize dates to avoid "RangeError: Invalid time value"
             const rawDate =
               commit.committerDate ||
