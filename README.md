@@ -1,2 +1,2 @@
 # met_rain_risk
-Rain risk from met.no for HomeAssistant. More info to come
+Rain risk from met.no for HomeAssistant. More info to come shortly

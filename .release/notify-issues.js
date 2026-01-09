@@ -111,8 +111,8 @@ async function main() {
   const tagToShow = gitTag || `v${version}`;
   const isBeta = String(channel).toLowerCase() === "beta";
   const commentBody = isBeta
-    ? `Included in **beta release ${tagToShow}**.`
-    : `Included in **release ${tagToShow}**.`;
+    ? `Included in beta release ${tagToShow}.`
+    : `Included in release ${tagToShow}.`;
 
   const base = `https://api.github.com/repos/${owner}/${name}`;
 
