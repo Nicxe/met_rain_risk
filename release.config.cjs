@@ -124,7 +124,10 @@ module.exports = {
       "@semantic-release/github",
       {
         draftRelease: true,
-        commentOnSuccess: false,
+        // Disable automated PR/issue comments from semantic-release
+        // (the "🎉 This PR is included in version ..." message)
+        successComment: false,
+        failComment: false,
         assets: [
           {
             path: "custom_components/met_rain_risk.zip",
