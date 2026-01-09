@@ -70,6 +70,10 @@ module.exports = {
               return null;
             }
 
+            // Some conventional-changelog presets mark certain commit types (e.g. docs/chore)
+            // as hidden by default. We want them visible in our release notes.
+            transformed.hidden = false;
+
             // Map conventional type -> pretty section title (this becomes commitGroups[].title)
             let rawType = transformed.type || commit.type;
             if (typeof rawType !== "string" || !rawType.trim()) {
