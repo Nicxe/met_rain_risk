@@ -1,0 +1,17 @@
+## **F1 Sensor – v{{version}}**
+
+{{#if prerelease}}
+⚠️ This is a **beta release** intended for testing.
+{{/if}}
+
+---
+
+{{#each commitGroups}}
+### {{title}}
+{{#each commits}}
+- {{subject}}
+{{#if bodyIndented}}
+{{bodyIndented}}
+{{/if}}
+{{/each}}
+{{/each}}
