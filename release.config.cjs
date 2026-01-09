@@ -1,7 +1,25 @@
 const fs = require("fs");
 const path = require("path");
-const conventionalCommits = require("conventional-changelog-conventionalcommits");
-const defaultWriterOpts = conventionalCommits.writerOpts || {};
+
+// NOTE:
+// In current versions, `conventional-changelog-conventionalcommits` exports an async preset factory
+// (it does not expose `writerOpts` synchronously). That means we cannot rely on the preset's
+// default writer transform here. Instead we do the type->section mapping ourselves so the
+// handlebars template can render nice headings (commitGroups[].title).
+
+const RELEASE_NOTE_TYPES = [
+  { type: "feat", section: "✨ New features" },
+  { type: "fix", section: "🐛 Bug fixes" },
+  { type: "docs", section: "📚 Documentation" },
+  { type: "refactor", section: "🧹 Refactoring" },
+  { type: "chore", section: "🔧 Maintenance" },
+  { type: "*", section: "📦 Other changes" }
+];
+
+const TYPE_TO_SECTION = RELEASE_NOTE_TYPES.reduce((acc, { type, section }) => {
+  acc[type] = section;
+  return acc;
+}, {});
 
 const mainTemplate = fs.readFileSync(
   path.join(__dirname, ".release", "release-notes.hbs"),
@@ -28,41 +46,22 @@ module.exports = {
       {
         preset: "conventionalcommits",
         presetConfig: {
-          types: [
-            { "type": "feat", "section": "✨ New features" },
-            { "type": "fix", "section": "🐛 Bug fixes" },
-            { "type": "docs", "section": "📚 Documentation" },
-            { "type": "refactor", "section": "🧹 Refactoring" },
-            { "type": "chore", "section": "🔧 Maintenance" },
-            { "type": "*", "section": "📦 Other changes" }
-          ]
+          types: RELEASE_NOTE_TYPES
         },
         writerOpts: {
-          ...defaultWriterOpts,
           mainTemplate,
           groupBy: "type",
           commitGroupsSort: "title",
           commitsSort: ["scope", "subject"],
           transform: (commit, context) => {
-            // Ensure unknown/missing types end up in the "Other changes" section
-            if (!commit.type) {
-              commit.type = "*";
+            const header = commit.header || commit.subject || "";
+
+            // Don't include GitHub merge commits in release notes
+            if (/^merge pull request/i.test(header) || /^merge branch/i.test(header)) {
+              return null;
             }
 
-            // Normalize type for matching against presetConfig
-            if (typeof commit.type === "string" && commit.type !== "*") {
-              commit.type = commit.type.toLowerCase();
-            }
-
-            // Run the preset's default transform first so type->section mapping works
-            const transformed = defaultWriterOpts.transform
-              ? defaultWriterOpts.transform(commit, context)
-              : commit;
-
-            // Preset transform can filter commits by returning null
-            if (!transformed) {
-              return transformed;
-            }
+            const transformed = { ...commit };
 
             // Make sure we always have a subject, otherwise skip the commit
             transformed.subject =
@@ -70,6 +69,14 @@ module.exports = {
             if (!transformed.subject.trim()) {
               return null;
             }
+
+            // Map conventional type -> pretty section title (this becomes commitGroups[].title)
+            let rawType = transformed.type || commit.type;
+            if (typeof rawType !== "string" || !rawType.trim()) {
+              rawType = "*";
+            }
+            rawType = rawType === "*" ? "*" : rawType.toLowerCase();
+            transformed.type = TYPE_TO_SECTION[rawType] || TYPE_TO_SECTION["*"];
 
             // Sanitize/normalize dates to avoid "RangeError: Invalid time value"
             const rawDate =
