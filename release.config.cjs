@@ -70,6 +70,10 @@ module.exports = {
               return null;
             }
 
+            // Some conventional-changelog presets mark certain commit types (e.g. docs/chore)
+            // as hidden by default. We want them visible in our release notes.
+            transformed.hidden = false;
+
             // Map conventional type -> pretty section title (this becomes commitGroups[].title)
             let rawType = transformed.type || commit.type;
             if (typeof rawType !== "string" || !rawType.trim()) {
@@ -77,6 +81,16 @@ module.exports = {
             }
             rawType = rawType === "*" ? "*" : rawType.toLowerCase();
             transformed.type = TYPE_TO_SECTION[rawType] || TYPE_TO_SECTION["*"];
+
+            // Optional: include commit body/description (everything after the first blank line)
+            // and pre-indent it so it renders nicely under the bullet in Markdown.
+            const body = (transformed.body || commit.body || "").trim();
+            if (body) {
+              transformed.bodyIndented = body
+                .split(/\r?\n/)
+                .map((line) => `  ${line}`) // 2-space indent => continues the list item
+                .join("\n");
+            }
 
             // Sanitize/normalize dates to avoid "RangeError: Invalid time value"
             const rawDate =
