@@ -107,27 +107,23 @@ class MetRainRiskCoordinator(DataUpdateCoordinator[MetRainRiskData]):
             "From": self._contact,
             "Accept": "application/json",
         }
-        self.logger.debug("Requesting met.no: url=%s headers=%s", url, headers)
+        # Coordinates and contact details are private configuration values.
+        # Keep diagnostics useful without copying request data into logs.
+        self.logger.debug("Requesting met.no forecast")
 
         try:
             async with async_timeout.timeout(10):
                 async with session.get(url, headers=headers) as resp:
                     if resp.status != 200:
-                        text = await resp.text()
-                        logging.getLogger(__name__).error(
-                            "met.no request failed (HTTP %s) for %s. Response: %s",
-                            resp.status,
-                            url,
-                            text[:500],
+                        self.logger.error(
+                            "met.no request failed (HTTP %s)", resp.status
                         )
-                        raise UpdateFailed(
-                            f"met.no returned HTTP {resp.status}: {text[:300]}"
-                        )
+                        raise UpdateFailed(f"met.no returned HTTP {resp.status}")
                     payload: dict[str, Any] = await resp.json()
         except UpdateFailed:
             raise
         except Exception as err:
-            raise UpdateFailed(f"Error fetching met.no data: {err}") from err
+            raise UpdateFailed("Error fetching met.no data") from err
 
         now = dt_util.utcnow()
         end = now + timedelta(hours=12)
